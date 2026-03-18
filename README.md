@@ -16,7 +16,7 @@ Local end-to-end flight booking system (Go, Postgres, Redis, Kafka) per LLD.
 
 3. **Run migrations** — Run `make migrate` once so the database has all tables and triggers. (Needs the `fb-postgres` container up.)
 
-4. **Start all services** — Run `make dev` to start the API server, dummy payment server, booking worker, cron worker, and CDC worker in the background.
+4. **Start all services** — Run `make dev` to start the API server, dummy payment server, booking worker, cron worker, and CDC worker in the background. Use autoenv to load the .env file.
 
 5. **Use the app** — Open http://localhost:8080/ in a browser: search flights, pick a flight and seats, book, and watch the booking status (and use “Refresh status” for session bookings).
 
