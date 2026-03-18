@@ -165,16 +165,16 @@ A flight booking system where users can browse upcoming flights, select seats, m
 ### 4.1 BookingIntent Status
 
 ```
-                          ┌────────────────────────────────────────────────────────┐
-                          │                                                        │
-                          │  user retries payment                                  │
-                          │  (new PaymentIntent, extend window)                    │
-                          │                                                        │
-  ┌───────────────┐       │     payment SUCCESS         ┌─────────────┐            │
-  │               │───────┼───────────────────────────▶ │  CONFIRMED  │            │
-  │   PENDING     │       │                             └─────────────┘            │
-  │               │       │     payment FAILED          ┌────────────────┐         │
-  │  (seats held, │───────┼───────────────────────────▶ │ PAYMENT_FAILED │─────────┘
+                          
+                          │                                                        
+                          │  user retries payment                                  
+                          │  (new PaymentIntent, extend window)                    
+                          │                                                        
+  ┌───────────────┐       │     payment SUCCESS         ┌─────────────┐            
+  │               │───────┼───────────────────────────▶ │  CONFIRMED  │            
+  │   PENDING     │       │                             └─────────────┘            
+  │               │       │     payment FAILED          ┌────────────────┐         
+  │  (seats held, │───────┼───────────────────────────▶ │ PAYMENT_FAILED │
   │  waiting for  │       │                             │                │
   │  callback)    │       │                             │  (seats still  │
   │               │       │                             │   reserved,    │
