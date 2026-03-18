@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flight Booking</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #f8fafc;
+      --card: #fff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --primary: #0f766e;
+      --primary-hover: #0d9488;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 920px; margin: 0 auto; padding: 1.5rem; background: var(--bg); color: var(--text); line-height: 1.5; }
+    h1 { margin: 0 0 1.5rem; font-size: 1.75rem; font-weight: 700; color: var(--text); }
+    h2 { margin: 0 0 0.75rem; font-size: 1rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 1.25rem; }
+    section { margin-bottom: 1.25rem; }
+    label { display: block; margin-bottom: 0.35rem; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); }
+    input, select { padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9375rem; margin-right: 0.5rem; margin-bottom: 0.5rem; }
+    button { padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9375rem; font-weight: 500; cursor: pointer; border: none; background: var(--primary); color: #fff; }
+    button:hover { background: var(--primary-hover); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.secondary { background: var(--border); color: var(--text); }
+    button.secondary:hover { background: #cbd5e1; }
+    .flight-card { border: 1px solid var(--border); padding: 1rem 1.25rem; margin-bottom: 0.5rem; cursor: pointer; border-radius: 8px; transition: background .15s, border-color .15s; }
+    .flight-card:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .flight-card.selected { border-color: var(--primary); background: #ccfbf1; }
+    .seat-grid { display: flex; flex-wrap: wrap; gap: 5px; margin: 1rem 0; }
+    .seat { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); }
+    .seat.available { background: #bbf7d0; color: #166534; }
+    .seat.reserved { background: #fef3c7; color: #92400e; }
+    .seat.booked { background: #fecaca; color: #991b1b; }
+    .seat.selected { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .status-badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8125rem; font-weight: 600; }
+    .status-PENDING { background: #fef3c7; color: #92400e; }
+    .status-PAYMENT_FAILED { background: #fecaca; color: #991b1b; }
+    .status-CONFIRMED { background: #bbf7d0; color: #166534; }
+    .status-EXPIRED { background: #e2e8f0; color: #475569; }
+    #bookingStatus.card { padding: 1.25rem; }
+    .section-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+    #history { list-style: none; padding: 0; margin: 0; }
+    #history li { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 0.75rem; font-size: 0.9375rem; }
+    #history li:last-child { border-bottom: none; }
+    #history li .hist-id { font-family: ui-monospace, monospace; font-size: 0.8125rem; color: var(--text-muted); }
+    #history li .hist-seats { color: var(--text-muted); font-size: 0.875rem; }
+    #history .empty { padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9375rem; }
+    .btn-refresh { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .btn-refresh.loading { pointer-events: none; opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <h1>Flight Booking</h1>
+
+  <section class="card">
+    <h2>Search</h2>
+    <label>From</label>
+    <select id="from">
+      <option value="DEL">Delhi (DEL)</option>
+      <option value="BOM">Mumbai (BOM)</option>
+      <option value="BLR">Bangalore (BLR)</option>
+      <option value="HYD">Hyderabad (HYD)</option>
+      <option value="CCU">Kolkata (CCU)</option>
+      <option value="MAA">Chennai (MAA)</option>
+      <option value="GOI">Goa (GOI)</option>
+      <option value="PNQ">Pune (PNQ)</option>
+      <option value="AMD">Ahmedabad (AMD)</option>
+      <option value="JAI">Jaipur (JAI)</option>
+    </select>
+    <label>To</label>
+    <select id="to">
+      <option value="BOM">Mumbai (BOM)</option>
+      <option value="DEL">Delhi (DEL)</option>
+      <option value="BLR">Bangalore (BLR)</option>
+      <option value="HYD">Hyderabad (HYD)</option>
+      <option value="CCU">Kolkata (CCU)</option>
+      <option value="MAA">Chennai (MAA)</option>
+      <option value="GOI">Goa (GOI)</option>
+      <option value="PNQ">Pune (PNQ)</option>
+      <option value="AMD">Ahmedabad (AMD)</option>
+      <option value="JAI">Jaipur (JAI)</option>
+    </select>
+    <label>Date</label>
+    <input type="date" id="date" />
+    <button id="searchBtn">Search</button>
+  </section>
+
+  <section id="resultsSection" class="card" style="display:none;">
+    <h2>Flights</h2>
+    <div id="results"></div>
+  </section>
+
+  <section id="seatSection" class="card" style="display:none;">
+    <h2>Select seats</h2>
+    <p id="flightSummary" style="margin:0 0 0.5rem; font-weight:500;"></p>
+    <div class="seat-grid" id="seatGrid"></div>
+    <button id="bookBtn" disabled>Book selected seats</button>
+  </section>
+
+  <section id="bookingStatus" class="card" style="display:none;">
+    <h2>Booking status</h2>
+    <p style="margin:0.25rem 0;"><strong>Booking ID:</strong> <span id="bookingId" style="font-family:ui-monospace,monospace; font-size:0.9rem;"></span></p>
+    <p style="margin:0.25rem 0;"><strong>Status:</strong> <span id="statusBadge" class="status-badge"></span></p>
+    <p style="margin:0.25rem 0;"><strong>Expires:</strong> <span id="expiresAt"></span></p>
+    <button id="retryBtn" style="display:none;">Retry payment</button>
+  </section>
+
+  <section class="card">
+    <div class="section-toolbar">
+      <h2 style="margin:0;">Session bookings</h2>
+      <span style="display:flex; gap:0.5rem;">
+        <button id="refreshHistoryBtn" class="btn-refresh secondary" type="button" title="Fetch latest status for all bookings">↻ Refresh status</button>
+        <button id="clearHistoryBtn" class="secondary" type="button" title="Clear list (stored in this browser only)">Clear history</button>
+      </span>
+    </div>
+    <p style="margin:0 0 0.5rem; font-size:0.8125rem; color:var(--text-muted);">Stored in this browser (localStorage). Cleared when you clear history or browser data.</p>
+    <ul id="history"></ul>
+  </section>
+
+  <script>
+    const API = '/api';
+    let selectedFlight = null;
+    let selectedSeats = [];
+    let pollTimer = null;
+    let currentBookingId = null;
+
+    async function initOnLoad() {
+      try {
+        const res = await fetch(API + '/instance');
+        if (res.ok) {
+          const data = await res.json();
+          const current = localStorage.getItem('serverInstanceId');
+          if (current !== data.instanceId) {
+            localStorage.removeItem('bookingHistory');
+            localStorage.setItem('serverInstanceId', data.instanceId);
+          }
+        }
+      } catch (_) {
+        localStorage.removeItem('bookingHistory');
+      }
+    }
+
+    function formatTime(isoStr) {
+      if (!isoStr) return '--';
+      const d = new Date(isoStr);
+      return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    function loadHistory() {
+      try {
+        const raw = localStorage.getItem('bookingHistory') || '[]';
+        const list = JSON.parse(raw);
+        const ul = document.getElementById('history');
+        if (list.length === 0) {
+          ul.innerHTML = '<li class="empty">No bookings in this session yet.</li>';
+          return;
+        }
+        ul.innerHTML = list.map(b => {
+          const status = b.status || 'PENDING';
+          const statusClass = 'status-badge status-' + status;
+          const seatsStr = (b.seats && b.seats.length) ? b.seats.join(', ') : '—';
+          return `<li><span class="hist-id">${b.bookingIntentId}</span><span class="hist-status ${statusClass}">${status}</span><span class="hist-seats">${seatsStr}</span></li>`;
+        }).join('');
+      } catch (_) {}
+    }
+
+    async function refreshHistory() {
+      const raw = localStorage.getItem('bookingHistory') || '[]';
+      let list;
+      try { list = JSON.parse(raw); } catch (_) { loadHistory(); return; }
+      if (list.length === 0) { loadHistory(); return; }
+      const btn = document.getElementById('refreshHistoryBtn');
+      const origText = btn.textContent;
+      btn.classList.add('loading');
+      btn.textContent = 'Refreshing…';
+      const kept = [];
+      for (let i = 0; i < list.length; i++) {
+        try {
+          const res = await fetch(`${API}/bookings/${list[i].bookingIntentId}`);
+          if (res.ok) {
+            const data = await res.json();
+            list[i].status = data.status;
+            list[i].seats = data.seats;
+            kept.push(list[i]);
+          }
+        } catch (_) {}
+      }
+      localStorage.setItem('bookingHistory', JSON.stringify(kept));
+      loadHistory();
+      btn.classList.remove('loading');
+      btn.textContent = origText;
+    }
+
+    document.getElementById('searchBtn').onclick = async () => {
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('to').value;
+      const date = document.getElementById('date').value;
+      if (!date) { alert('Pick a date'); return; }
+      const res = await fetch(`${API}/flights?from=${from}&to=${to}&date=${date}`);
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || 'Failed'); return; }
+      document.getElementById('resultsSection').style.display = 'block';
+      const div = document.getElementById('results');
+      div.innerHTML = data.flights.map(f => `
+        <div class="flight-card" data-id="${f.id}" data-origin="${f.origin}" data-dest="${f.destination}" data-price="${f.price}" data-available="${f.availableSeats}">
+          ${f.origin} → ${f.destination} | ${formatTime(f.departureTime)} – ${formatTime(f.arrivalTime)} | ₹${f.price} | ${f.availableSeats} seats
+        </div>
+      `).join('');
+      div.querySelectorAll('.flight-card').forEach(el => {
+        el.onclick = () => {
+          div.querySelectorAll('.flight-card').forEach(c => c.classList.remove('selected'));
+          el.classList.add('selected');
+          selectedFlight = { id: el.dataset.id, origin: el.dataset.origin, dest: el.dataset.dest, price: parseFloat(el.dataset.price) };
+          showSeatMap(el.dataset.id);
+        };
+      });
+    };
+
+    async function showSeatMap(flightId) {
+      document.getElementById('seatSection').style.display = 'block';
+      const res = await fetch(`${API}/flights/${flightId}`);
+      const f = await res.json();
+      if (!res.ok) { alert('Failed to load flight'); return; }
+      document.getElementById('flightSummary').textContent = `${f.origin} → ${f.destination} | ₹${f.price}`;
+      const available = new Set(f.seatMap.available);
+      const reserved = new Set(f.seatMap.reserved);
+      const booked = new Set(f.seatMap.booked);
+      selectedSeats = [];
+      const grid = document.getElementById('seatGrid');
+      const all = ['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','N1','N2','N3','N4','N5','N6','N7','N8','N9','N10'];
+      grid.innerHTML = all.map(seat => {
+        let cls = 'available';
+        if (booked.has(seat)) cls = 'booked';
+        else if (reserved.has(seat)) cls = 'reserved';
+        const clickable = available.has(seat);
+        return `<span class="seat ${cls}" data-seat="${seat}" data-clickable="${clickable}">${seat}</span>`;
+      }).join('');
+      grid.querySelectorAll('.seat').forEach(el => {
+        if (el.dataset.clickable !== 'true') return;
+        el.onclick = () => {
+          const s = el.dataset.seat;
+          if (selectedSeats.includes(s)) {
+            selectedSeats = selectedSeats.filter(x => x !== s);
+            el.classList.remove('selected');
+          } else {
+            selectedSeats.push(s);
+            el.classList.add('selected');
+          }
+          document.getElementById('bookBtn').disabled = selectedSeats.length === 0;
+        };
+      });
+      document.getElementById('bookBtn').disabled = true;
+      document.getElementById('bookBtn').onclick = () => doBook(flightId);
+    }
+
+    async function doBook(flightId) {
+      if (selectedSeats.length === 0) return;
+      const userId = '550e8400-e29b-41d4-a716-446655440000';
+      const res = await fetch(`${API}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flightId,
+          seats: selectedSeats,
+          userId,
+          customerDetails: { name: 'Test User', email: 'test@test.com' }
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || 'Book failed'); return; }
+      currentBookingId = data.bookingIntentId;
+      document.getElementById('bookingStatus').style.display = 'block';
+      document.getElementById('bookingId').textContent = data.bookingIntentId;
+      document.getElementById('statusBadge').textContent = data.status;
+      document.getElementById('statusBadge').className = 'status-badge status-' + data.status;
+      document.getElementById('expiresAt').textContent = new Date(data.expiresAt).toLocaleString();
+      document.getElementById('retryBtn').style.display = data.status === 'PAYMENT_FAILED' && data.retriesRemaining > 0 ? 'inline-block' : 'none';
+      try {
+        const hist = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
+        hist.push({ bookingIntentId: data.bookingIntentId, status: data.status, seats: data.seats });
+        localStorage.setItem('bookingHistory', JSON.stringify(hist));
+      } catch (_) {}
+      loadHistory();
+      startPolling();
+    }
+
+    function startPolling() {
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(pollBooking, 2000);
+    }
+
+    async function pollBooking() {
+      if (!currentBookingId) return;
+      const res = await fetch(`${API}/bookings/${currentBookingId}`);
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 404) {
+          const raw = localStorage.getItem('bookingHistory') || '[]';
+          const list = JSON.parse(raw).filter(b => b.bookingIntentId !== currentBookingId);
+          localStorage.setItem('bookingHistory', JSON.stringify(list));
+          loadHistory();
+        }
+        return;
+      }
+      document.getElementById('statusBadge').textContent = data.status;
+      document.getElementById('statusBadge').className = 'status-badge status-' + data.status;
+      document.getElementById('expiresAt').textContent = new Date(data.expiresAt).toLocaleString();
+      document.getElementById('retryBtn').style.display = data.status === 'PAYMENT_FAILED' && data.retriesRemaining > 0 ? 'inline-block' : 'none';
+      if (data.status === 'CONFIRMED' || data.status === 'EXPIRED') clearInterval(pollTimer);
+      try {
+        const raw = localStorage.getItem('bookingHistory') || '[]';
+        const list = JSON.parse(raw);
+        const idx = list.findIndex(b => b.bookingIntentId === currentBookingId);
+        if (idx >= 0) { list[idx].status = data.status; localStorage.setItem('bookingHistory', JSON.stringify(list)); }
+      } catch (_) {}
+      loadHistory();
+    }
+
+    document.getElementById('retryBtn').onclick = async () => {
+      if (!currentBookingId) return;
+      const res = await fetch(`${API}/bookings/${currentBookingId}/retry`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || 'Retry failed'); return; }
+      document.getElementById('statusBadge').textContent = data.status;
+      document.getElementById('expiresAt').textContent = new Date(data.expiresAt).toLocaleString();
+      document.getElementById('retryBtn').style.display = data.retriesRemaining > 0 ? 'inline-block' : 'none';
+      startPolling();
+    };
+
+    document.getElementById('refreshHistoryBtn').onclick = refreshHistory;
+
+    document.getElementById('clearHistoryBtn').onclick = function() {
+      localStorage.removeItem('bookingHistory');
+      loadHistory();
+    };
+
+    initOnLoad().then(function() {
+      loadHistory();
+      refreshHistory();
+    });
+  </script>
+</body>
+</html>

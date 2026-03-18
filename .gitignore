@@ -1,0 +1,34 @@
+# Binaries (from go build in repo root or make)
+/api
+/seeder
+/cron-worker
+/cdc-worker
+/booking-worker
+/payment-server
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go
+*.test
+*.out
+vendor/
+
+# IDE and OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Env (keep .env.example)
+.env
+!.env.example
+
+# Logs and temp
+*.log
+docker.log
+err.txt
