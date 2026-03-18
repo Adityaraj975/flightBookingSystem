@@ -1,6 +1,6 @@
 # Flight Booking System
 
-Local end-to-end flight booking system (Go, Postgres, Redis, Kafka) per LLD.
+Local end-to-end flight booking system (Go, Postgres, Redis, Kafka).
 
 ## Prerequisites
 
@@ -8,7 +8,7 @@ Local end-to-end flight booking system (Go, Postgres, Redis, Kafka) per LLD.
 - Docker & Docker Compose
 - Make
 
-## Run the whole system (5 steps)
+## Run the whole system
 
 1. **Clone and install deps** — From the repo root, run `go mod tidy` to download Go dependencies.
 
