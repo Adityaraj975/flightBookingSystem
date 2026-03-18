@@ -80,3 +80,8 @@ Copy `.env.example` to `.env` and adjust. Defaults work with `make infra-up` (Po
 ## Hot cache refresh
 
 Every time someone searches for flights (e.g. Delhi → Mumbai on a date), we increment a counter in Redis for that origin, that destination, and that date. Every few minutes the cron worker looks at these counters: if an origin or destination has been searched more than a set number of times (the “threshold”), we mark it as “hot”. For hot routes we then pre-load all matching flights from the database into Redis (by origin+date or destination+date) so the next search is served from cache and is faster. So the system automatically treats busy routes as hot and caches them; quieter routes are still served from the database or a smaller cache when needed.
+
+
+## Payment webhook race condition simulation
+
+To simulate payment webhook race conditions (e.g. two SUCCESS callbacks for the same booking), run `./scripts/race_simulation.sh` with the API and booking-worker up; the script creates a booking, retries to get a second payment intent, then sends both SUCCESS webhooks in parallel and prints which payment intent won. See `scripts/README.md` for details.
